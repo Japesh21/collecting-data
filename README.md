@@ -1,7 +1,7 @@
-# Hospital Management System
+# data collecting System
 
 ## 🚀 About This Project
-A simple hospital management system built with **Node.js**, **Express**, and **MySQL**.
+A simple data collecting system built with **Node.js**, **Express**, and **MySQL**.
 
 ## 📌 Features
 - Add and retrieve patient details.
