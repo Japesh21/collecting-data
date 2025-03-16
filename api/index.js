@@ -38,7 +38,7 @@ db.connect(err => {
 // ✅ Middleware to Check API Key
 function authenticate(req, res, next) {
     const userApiKey = req.headers["x-api-key"];
-    if (userApiKey !== process.env.API_KEY) {
+    if (!userApiKey || userApiKey !== process.env.API_KEY) {
         return res.status(403).json({ message: "❌ Unauthorized - Invalid API Key" });
     }
     next();
@@ -51,7 +51,7 @@ app.post("/submit",
         body("name").isString().notEmpty(),
         body("rollno").isNumeric(),
         body("city").isString().notEmpty(),
-        body("info").isString()
+        body("info").optional().isString()
     ],
     (req, res) => {
         const errors = validationResult(req);
@@ -61,10 +61,10 @@ app.post("/submit",
 
         const { name, rollno, city, info } = req.body;
         const sql = "INSERT INTO patients (name, rollno, city, info) VALUES (?, ?, ?, ?)";
-        db.query(sql, [name, rollno, city, info], (err, result) => {
+        db.query(sql, [name, rollno, city, info || null], (err, result) => {
             if (err) {
                 console.error("❌ Insert Error:", err);
-                res.status(500).json({ message: "Database error!" });
+                res.status(500).json({ message: "❌ Database error!" });
             } else {
                 res.json({ message: "✅ Data submitted successfully!" });
             }
@@ -78,7 +78,7 @@ app.get("/data", authenticate, (req, res) => {
     db.query(sql, (err, results) => {
         if (err) {
             console.error("❌ Fetch Error:", err);
-            res.status(500).json({ message: "Database error!" });
+            res.status(500).json({ message: "❌ Database error!" });
         } else {
             res.json(results);
         }
