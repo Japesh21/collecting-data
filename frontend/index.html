@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 30px; }
+        form { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        input, textarea, button { width: 100%; margin: 5px 0; padding: 10px; }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; }
+        th { background: lightgray; }
+    </style>
+</head>
+<body>
+
+    <h2>Hospital Management System</h2>
+
+    <form id="dataForm">
+        <input type="text" id="name" placeholder="Enter Name" required>
+        <input type="number" id="rollno" placeholder="Enter Roll No" required>
+        <input type="text" id="city" placeholder="Enter City" required>
+        <textarea id="info" placeholder="Enter Patient Info" required></textarea>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h3>Stored Data:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Roll No</th>
+                <th>City</th>
+                <th>Info</th>
+            </tr>
+        </thead>
+        <tbody id="dataTable"></tbody>
+    </table>
+
+    <script>
+        // ✅ The API key is stored in the .env file in the backend, so the frontend must send it with each request
+        const API_KEY = "your-secret-key"; // ✅ Replace this with the **same API key** from .env
+
+        document.getElementById("dataForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            
+            const userData = {
+                name: document.getElementById("name").value,
+                rollno: document.getElementById("rollno").value,
+                city: document.getElementById("city").value,
+                info: document.getElementById("info").value
+            };
+
+            try {
+                const response = await fetch("http://localhost:3000/submit", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "x-api-key": API_KEY // ✅ Sending API Key in header
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const result = await response.json();
+                alert(result.message);
+                loadData();  // Refresh table
+            } catch (error) {
+                console.error("❌ Error:", error);
+                alert("Failed to submit data.");
+            }
+        });
+
+        // ✅ Fetch and display stored data
+        async function loadData() {
+            try {
+                const response = await fetch("http://localhost:3000/data", {
+                    headers: {
+                        "x-api-key": API_KEY // ✅ Sending API Key in header
+                    }
+                });
+                const data = await response.json();
+
+                const tableBody = document.getElementById("dataTable");
+                tableBody.innerHTML = "";
+                data.forEach(user => {
+                    const row = `<tr>
+                        <td>${user.name}</td>
+                        <td>${user.rollno}</td>
+                        <td>${user.city}</td>
+                        <td>${user.info}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error("❌ Error fetching data:", error);
+            }
+        }
+
+        loadData(); // ✅ Load data when page opens
+    </script>
+
+</body>
+</html>
